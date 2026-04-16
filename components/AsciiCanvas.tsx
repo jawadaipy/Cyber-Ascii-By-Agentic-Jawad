@@ -377,7 +377,7 @@ export const AsciiCanvas = forwardRef<AsciiCanvasHandle, AsciiCanvasProps>(({
         />
         
         {/* Floating Controls Container (Minimized for better view) */}
-        <div className="absolute bottom-20 md:bottom-24 left-1/2 transform -translate-x-1/2 flex items-center gap-3 md:gap-4 z-40 bg-black/30 p-2 md:p-2.5 rounded-full backdrop-blur-sm border border-green-500/20 shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
+        <div className="absolute bottom-24 md:bottom-28 left-1/2 transform -translate-x-1/2 flex items-center gap-3 md:gap-4 z-40 bg-black/30 p-2 md:p-2.5 rounded-full backdrop-blur-sm border border-green-500/20 shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
             {/* Camera Toggle */}
             <div className="flex flex-col items-center gap-1 px-1">
                 <button 
