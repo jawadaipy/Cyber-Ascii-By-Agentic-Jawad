@@ -51,11 +51,11 @@ export const AsciiCanvas = forwardRef<AsciiCanvasHandle, AsciiCanvasProps>(({
       }
 
       try {
-        // Boost camera quality: Requesting HD resolution
+        // Ultimate camera quality: Requesting Full HD if available
         stream = await navigator.mediaDevices.getUserMedia({ 
           video: { 
-            width: { ideal: 1280 }, 
-            height: { ideal: 720 }, 
+            width: { ideal: 1920 }, 
+            height: { ideal: 1080 }, 
             facingMode: 'user',
             frameRate: { ideal: 30 }
           } 
@@ -87,12 +87,13 @@ export const AsciiCanvas = forwardRef<AsciiCanvasHandle, AsciiCanvasProps>(({
     const handleResize = () => {
         if (canvasRef.current) {
             const parent = canvasRef.current.parentElement;
+            const dpr = window.devicePixelRatio || 1;
             if (parent) {
-                canvasRef.current.width = parent.clientWidth;
-                canvasRef.current.height = parent.clientHeight;
+                canvasRef.current.width = parent.clientWidth * dpr;
+                canvasRef.current.height = parent.clientHeight * dpr;
             } else {
-                canvasRef.current.width = window.innerWidth;
-                canvasRef.current.height = window.innerHeight;
+                canvasRef.current.width = window.innerWidth * dpr;
+                canvasRef.current.height = window.innerHeight * dpr;
             }
         }
     };
@@ -194,8 +195,12 @@ export const AsciiCanvas = forwardRef<AsciiCanvasHandle, AsciiCanvasProps>(({
         data[i] = newValue;
       }
 
+      const dpr = window.devicePixelRatio || 1;
+      ctx.save();
+      ctx.scale(dpr, dpr);
+
       ctx.fillStyle = '#000000';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, canvas.width / dpr, canvas.height / dpr);
       
       // Sharpen text rendering
       ctx.font = `bold ${options.fontSize}px 'JetBrains Mono', monospace`;
@@ -262,6 +267,8 @@ export const AsciiCanvas = forwardRef<AsciiCanvasHandle, AsciiCanvasProps>(({
             ctx.fillText(rowText, 0, y * charHeight);
           }
       }
+
+      ctx.restore();
 
       animationRef.current = requestAnimationFrame(renderLoop);
     };
@@ -369,66 +376,66 @@ export const AsciiCanvas = forwardRef<AsciiCanvasHandle, AsciiCanvasProps>(({
           }`} 
         />
         
-        {/* Floating Controls Container */}
-        <div className="absolute bottom-24 md:bottom-32 left-1/2 transform -translate-x-1/2 flex items-center gap-2 md:gap-5 z-40 bg-black/40 p-3 md:p-4 rounded-3xl backdrop-blur-md border border-green-500/20 shadow-[0_0_30px_rgba(0,0,0,0.5)] scale-90 md:scale-100">
+        {/* Floating Controls Container (Minimized for better view) */}
+        <div className="absolute bottom-20 md:bottom-24 left-1/2 transform -translate-x-1/2 flex items-center gap-3 md:gap-4 z-40 bg-black/30 p-2 md:p-2.5 rounded-full backdrop-blur-sm border border-green-500/20 shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
             {/* Camera Toggle */}
-            <div className="flex flex-col items-center gap-1">
+            <div className="flex flex-col items-center gap-1 px-1">
                 <button 
                     onClick={handleCameraToggleClick}
-                    className={`p-3 md:p-4 rounded-full border transition-all active:scale-95 group relative ${
+                    className={`p-2.5 rounded-full border transition-all active:scale-95 group relative ${
                       isCameraOn 
                         ? 'bg-green-500/20 border-green-500/50 text-green-400 hover:bg-green-500/30' 
                         : 'bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20'
                     }`}
                 >
-                    {isCameraOn ? <Video className="w-5 h-5 md:w-6 md:h-6" /> : <VideoOff className="w-5 h-5 md:w-6 md:h-6" />}
+                    {isCameraOn ? <Video className="w-4 h-4 md:w-5 md:h-5" /> : <VideoOff className="w-4 h-4 md:w-5 md:h-5" />}
                 </button>
-                <span className="text-[7px] md:text-[8px] text-white/40 font-mono uppercase">Cam</span>
+                <span className="text-[7px] text-white/50 font-mono uppercase tracking-wider">Cam</span>
             </div>
 
             {/* Upload/Clear Toggle */}
-            <div className="flex flex-col items-center gap-1">
+            <div className="flex flex-col items-center gap-1 px-1">
                 {uploadedImage ? (
                   <button 
                     onClick={clearImage}
-                    className="bg-red-500/20 border border-red-500/50 p-3 md:p-4 rounded-full text-red-400 hover:bg-red-500/30 transition-all active:scale-95"
+                    className="bg-red-500/20 border border-red-500/50 p-2.5 rounded-full text-red-400 hover:bg-red-500/30 transition-all active:scale-95"
                   >
-                    <X className="w-5 h-5 md:w-6 md:h-6" />
+                    <X className="w-4 h-4 md:w-5 md:h-5" />
                   </button>
                 ) : (
                   <button 
                     onClick={handleUploadClick}
-                    className="bg-blue-500/20 border border-blue-500/50 p-3 md:p-4 rounded-full text-blue-400 hover:bg-blue-500/30 transition-all active:scale-95"
+                    className="bg-blue-500/20 border border-blue-500/50 p-2.5 rounded-full text-blue-400 hover:bg-blue-500/30 transition-all active:scale-95"
                   >
-                    <Upload className="w-5 h-5 md:w-6 md:h-6" />
+                    <Upload className="w-4 h-4 md:w-5 md:h-5" />
                   </button>
                 )}
-                <span className="text-[7px] md:text-[8px] text-white/40 font-mono uppercase">{uploadedImage ? 'Clear' : 'Upload'}</span>
+                <span className="text-[7px] text-white/50 font-mono uppercase tracking-wider">{uploadedImage ? 'Clear' : 'Upload'}</span>
             </div>
 
             {/* Scan & Analyze Button (Primary) */}
-            <div className="flex flex-col items-center gap-2 px-1 md:px-2">
+            <div className="flex flex-col items-center gap-1.5 px-2">
                 <button 
                     onClick={handleCaptureClick}
-                    className="bg-green-500/20 hover:bg-green-500/40 text-green-400 border border-green-500/50 p-5 md:p-6 rounded-full backdrop-blur-md transition-all active:scale-95 group relative hover:shadow-[0_0_25px_rgba(0,255,0,0.5)]"
+                    className="bg-green-500/20 hover:bg-green-500/40 text-green-400 border border-green-500/50 p-3 md:p-3.5 rounded-full backdrop-blur-md transition-all active:scale-95 group relative hover:shadow-[0_0_15px_rgba(0,255,0,0.4)]"
                 >
-                    <div className="absolute inset-0 rounded-full border border-green-500 opacity-50 animate-ping"></div>
-                    <ScanEye className="w-6 h-6 md:w-8 md:h-8" />
+                    <div className="absolute inset-0 rounded-full border border-green-500 opacity-20 animate-ping" style={{ animationDuration: '2s' }}></div>
+                    <ScanEye className="w-5 h-5 md:w-6 md:h-6" />
                 </button>
-                <span className="text-[9px] md:text-[10px] text-green-500 font-bold tracking-tighter uppercase whitespace-nowrap bg-black/60 px-2 py-0.5 rounded border border-green-500/20">
+                <span className="text-[8px] md:text-[9px] text-green-500 font-bold tracking-tighter uppercase whitespace-nowrap bg-black/60 px-1.5 py-0.5 rounded border border-green-500/20">
                     Neural Scan
                 </span>
             </div>
 
             {/* Screenshot Button */}
-            <div className="flex flex-col items-center gap-1">
+            <div className="flex flex-col items-center gap-1 px-1">
                 <button 
                     onClick={handleScreenshotClick}
-                    className="bg-black/60 hover:bg-green-900/80 text-green-400 border border-green-500/50 p-3 md:p-4 rounded-full backdrop-blur-md transition-all active:scale-95 hover:scale-105"
+                    className="bg-black/40 hover:bg-green-900/80 text-green-400 border border-green-500/40 p-2.5 rounded-full backdrop-blur-md transition-all active:scale-95 hover:scale-105"
                 >
-                    <Camera className="w-5 h-5 md:w-6 md:h-6" />
+                    <Camera className="w-4 h-4 md:w-5 md:h-5" />
                 </button>
-                <span className="text-[7px] md:text-[8px] text-white/40 font-mono uppercase">Save</span>
+                <span className="text-[7px] text-white/50 font-mono uppercase tracking-wider">Save</span>
             </div>
         </div>
     </div>

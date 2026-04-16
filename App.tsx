@@ -55,7 +55,7 @@ const App: React.FC = () => {
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden flex flex-col">
       {/* Header / HUD */}
-      <header className="absolute top-0 left-0 w-full p-4 z-20 flex justify-between items-center pointer-events-none bg-gradient-to-b from-black/80 to-transparent">
+      <header className="absolute top-0 left-0 w-full p-4 pt-6 md:pt-4 z-20 flex justify-between items-center pointer-events-none bg-gradient-to-b from-black/90 to-transparent">
         <div className="flex items-center gap-2 text-green-500 pointer-events-auto">
           <Terminal className="w-6 h-6 animate-pulse" />
           <h1 className="text-xl font-bold tracking-widest uppercase text-shadow-glow">CyberAscii <span className="text-sm border border-green-500/50 px-1 rounded">By Agentic Jawad</span></h1>

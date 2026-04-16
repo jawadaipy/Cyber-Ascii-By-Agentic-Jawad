@@ -21,122 +21,124 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ options, setOptions,
   }
 
   return (
-    <div className="absolute bottom-0 w-full bg-black/90 border-t border-green-900/50 backdrop-blur-md p-3 z-30 transition-all duration-300">
-      <div className="max-w-7xl mx-auto flex flex-nowrap md:flex-wrap gap-4 md:gap-8 overflow-x-auto pb-4 md:pb-0 scrollbar-hide items-center text-green-500 text-[10px] md:text-xs font-mono">
+    <div className="absolute bottom-0 w-full bg-black/95 border-t border-green-500/30 backdrop-blur-xl p-3 z-30 transition-all duration-300 shadow-[0_-10px_30px_rgba(0,0,0,0.8)]">
+      <div className="max-w-screen-2xl mx-auto flex flex-nowrap lg:flex-wrap gap-4 lg:gap-8 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 scrollbar-hide items-center text-green-500 text-[11px] lg:text-xs font-mono px-2">
         
-        {/* Analyze Button Redundancy */}
-        {onAnalyze && (
-          <div className="shrink-0">
+        {/* ACTION GROUP */}
+        <div className="flex items-center gap-2 pr-4 border-r border-green-900/40 shrink-0">
+          {onAnalyze && (
             <button 
               onClick={() => { playButtonSound(); onAnalyze(); }}
-              className="flex items-center gap-2 px-3 py-1.5 bg-green-900/40 border border-green-500/50 text-green-400 font-bold rounded-sm hover:bg-green-500 hover:text-black transition-all group whitespace-nowrap"
+              className="flex items-center gap-2 px-4 py-2 bg-green-500 text-black font-bold rounded-full hover:bg-green-400 transition-all shadow-[0_0_15px_rgba(34,197,94,0.4)] active:scale-95 whitespace-nowrap"
             >
-              <ScanEye className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+              <ScanEye className="w-4 h-4" />
               ANALYZE
             </button>
-          </div>
-        )}
+          )}
 
-        {/* Reset Button */}
-        {onReset && (
-          <div className="shrink-0">
+          {onReset && (
             <button 
               onClick={() => { playButtonSound(); onReset(); }}
-              className="flex items-center gap-2 px-3 py-1.5 bg-red-900/20 border border-red-500/30 text-red-500 font-bold rounded-sm hover:bg-red-500 hover:text-black transition-all group whitespace-nowrap"
-              title="Reset to Default"
+              className="flex items-center justify-center p-2 bg-red-950/20 border border-red-500/30 text-red-500 rounded-full hover:bg-red-500 hover:text-black transition-all group shrink-0"
+              title="Reset Settings"
             >
-              <RotateCcw className="w-3.5 h-3.5 group-hover:rotate-[-90deg] transition-transform" />
-              RESET
+              <RotateCcw className="w-4 h-4 group-hover:rotate-[-180deg] transition-transform duration-500" />
             </button>
+          )}
+        </div>
+
+        {/* IMAGE CONTROLS */}
+        <div className="flex items-center gap-6 px-4 border-r border-green-900/40 shrink-0">
+          {/* Font Size */}
+          <div className="flex flex-col gap-1 w-28 shrink-0">
+            <div className="flex items-center gap-2 mb-0.5 opacity-60">
+               <Type className="w-3 h-3" />
+               <label className="uppercase tracking-tighter">FONT: {options.fontSize}px</label>
+            </div>
+            <input 
+              type="range" 
+              min="6" 
+              max="24" 
+              value={options.fontSize} 
+              onChange={(e) => handleChange('fontSize', Number(e.target.value))}
+              className="accent-green-500 h-1 bg-green-950 rounded-lg appearance-none cursor-pointer"
+            />
           </div>
-        )}
 
-        {/* Font Size */}
-        <div className="flex flex-col gap-1 w-28 md:w-32 shrink-0">
-          <div className="flex items-center gap-2 mb-0.5 opacity-70">
-             <Type className="w-3 h-3" />
-             <label className="uppercase">FONT: {options.fontSize}px</label>
+          {/* Brightness */}
+          <div className="flex flex-col gap-1 w-28 shrink-0">
+             <div className="flex items-center gap-2 mb-0.5 opacity-60">
+               <Sliders className="w-3 h-3" />
+               <label className="uppercase tracking-tighter">GAIN: {options.brightness.toFixed(1)}</label>
+             </div>
+            <input 
+              type="range" 
+              min="0.5" 
+              max="2.0" 
+              step="0.1" 
+              value={options.brightness} 
+              onChange={(e) => handleChange('brightness', Number(e.target.value))}
+              className="accent-green-500 h-1 bg-green-950 rounded-lg appearance-none cursor-pointer"
+            />
           </div>
-          <input 
-            type="range" 
-            min="6" 
-            max="24" 
-            value={options.fontSize} 
-            onChange={(e) => handleChange('fontSize', Number(e.target.value))}
-            className="accent-green-500 h-1 bg-green-900/50 rounded-lg appearance-none cursor-pointer"
-          />
+
+          {/* Contrast */}
+          <div className="flex flex-col gap-1 w-28 shrink-0">
+             <div className="flex items-center gap-2 mb-0.5 opacity-60">
+               <Monitor className="w-3 h-3" />
+               <label className="uppercase tracking-tighter">CONTRAST: {options.contrast.toFixed(1)}</label>
+             </div>
+            <input 
+              type="range" 
+              min="0.5" 
+              max="3.0" 
+              step="0.1" 
+              value={options.contrast} 
+              onChange={(e) => handleChange('contrast', Number(e.target.value))}
+              className="accent-green-500 h-1 bg-green-950 rounded-lg appearance-none cursor-pointer"
+            />
+          </div>
         </div>
 
-        {/* Brightness */}
-        <div className="flex flex-col gap-1 w-28 md:w-32 shrink-0">
-           <div className="flex items-center gap-2 mb-0.5 opacity-70">
-             <Sliders className="w-3 h-3" />
-             <label className="uppercase">GAIN: {options.brightness.toFixed(1)}</label>
-           </div>
-          <input 
-            type="range" 
-            min="0.5" 
-            max="2.0" 
-            step="0.1" 
-            value={options.brightness} 
-            onChange={(e) => handleChange('brightness', Number(e.target.value))}
-            className="accent-green-500 h-1 bg-green-900/50 rounded-lg appearance-none cursor-pointer"
-          />
-        </div>
+        {/* MODE SELECTORS */}
+        <div className="flex items-center gap-8 pl-4 shrink-0">
+          {/* Color Mode */}
+          <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 opacity-50">
+                  <Palette className="w-3 h-3" />
+                  <span className="uppercase tracking-widest text-[9px]">Filter</span>
+              </div>
+              <div className="flex gap-1.5">
+                  {(['matrix', 'bw', 'retro', 'color'] as const).map(mode => (
+                      <button
+                          key={mode}
+                          onClick={() => handleModeChange('colorMode', mode)}
+                          className={`px-3 py-1 border rounded-sm ${options.colorMode === mode ? 'bg-green-500 text-black border-green-500' : 'bg-transparent border-green-900 border-dashed text-green-900 hover:border-green-500 hover:text-green-500'} text-[9px] uppercase font-bold transition-all`}
+                      >
+                          {mode}
+                      </button>
+                  ))}
+              </div>
+          </div>
 
-        {/* Contrast */}
-        <div className="flex flex-col gap-1 w-28 md:w-32 shrink-0">
-           <div className="flex items-center gap-2 mb-0.5 opacity-70">
-             <Monitor className="w-3 h-3" />
-             <label className="uppercase">EXP: {options.contrast.toFixed(1)}</label>
-           </div>
-          <input 
-            type="range" 
-            min="0.5" 
-            max="3.0" 
-            step="0.1" 
-            value={options.contrast} 
-            onChange={(e) => handleChange('contrast', Number(e.target.value))}
-            className="accent-green-500 h-1 bg-green-900/50 rounded-lg appearance-none cursor-pointer"
-          />
-        </div>
-
-        {/* Color Mode */}
-        <div className="flex flex-col gap-1.5 shrink-0">
-            <div className="flex items-center gap-2 opacity-70">
-                <Palette className="w-3 h-3" />
-                <span className="uppercase">FILTER</span>
-            </div>
-            <div className="flex gap-1">
-                {(['matrix', 'bw', 'retro', 'color'] as const).map(mode => (
-                    <button
-                        key={mode}
-                        onClick={() => handleModeChange('colorMode', mode)}
-                        className={`px-2 py-0.5 border ${options.colorMode === mode ? 'bg-green-500 text-black border-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-transparent border-green-900/50 text-green-800 hover:border-green-500'} text-[9px] uppercase transition-all`}
-                    >
-                        {mode}
-                    </button>
-                ))}
-            </div>
-        </div>
-
-        {/* Density Map */}
-        <div className="flex flex-col gap-1.5 shrink-0">
-            <div className="flex items-center gap-2 opacity-70">
-                <Type className="w-3 h-3" />
-                <span className="uppercase">KERNEL</span>
-            </div>
-            <div className="flex gap-1">
-                {(Object.keys(DENSITY_MAPS) as Array<keyof typeof DENSITY_MAPS>).map(mode => (
-                    <button
-                        key={mode}
-                        onClick={() => handleModeChange('density', mode)}
-                        className={`px-2 py-0.5 border ${options.density === mode ? 'bg-green-500 text-black border-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-transparent border-green-900/50 text-green-800 hover:border-green-500'} text-[9px] uppercase transition-all`}
-                    >
-                        {mode}
-                    </button>
-                ))}
-            </div>
+          {/* Density Map */}
+          <div className="flex flex-col gap-2 pr-6">
+              <div className="flex items-center gap-2 opacity-50">
+                  <Type className="w-3 h-3" />
+                  <span className="uppercase tracking-widest text-[9px]">Complex</span>
+              </div>
+              <div className="flex gap-1.5">
+                  {(Object.keys(DENSITY_MAPS) as Array<keyof typeof DENSITY_MAPS>).map(mode => (
+                      <button
+                          key={mode}
+                          onClick={() => handleModeChange('density', mode)}
+                          className={`px-3 py-1 border rounded-sm ${options.density === mode ? 'bg-green-500 text-black border-green-500' : 'bg-transparent border-green-900 border-dashed text-green-900 hover:border-green-500 hover:text-green-500'} text-[9px] uppercase font-bold transition-all`}
+                      >
+                          {mode}
+                      </button>
+                  ))}
+              </div>
+          </div>
         </div>
 
       </div>
