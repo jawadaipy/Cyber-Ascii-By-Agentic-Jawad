@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { AsciiCanvas } from './components/AsciiCanvas';
+import React, { useState, useCallback, useRef } from 'react';
+import { AsciiCanvas, AsciiCanvasHandle } from './components/AsciiCanvas';
 import { ControlPanel } from './components/ControlPanel';
 import { AnalysisModal } from './components/AnalysisModal';
 import { AsciiOptions, AnalysisResult } from './types';
@@ -17,6 +17,7 @@ const App: React.FC = () => {
     resolution: 0.2, // Factor of window size
   });
 
+  const canvasRef = useRef<AsciiCanvasHandle>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -53,7 +54,15 @@ const App: React.FC = () => {
           <Terminal className="w-6 h-6 animate-pulse" />
           <h1 className="text-xl font-bold tracking-widest uppercase text-shadow-glow">CyberAscii <span className="text-sm border border-green-500/50 px-1 rounded">By Agentic Jawad</span></h1>
         </div>
-        <div className="text-green-800 text-[10px] md:text-xs flex gap-2 md:gap-4 font-mono pointer-events-auto">
+        <div className="text-green-800 text-[10px] md:text-xs flex gap-2 md:gap-4 font-mono pointer-events-auto items-center">
+          <a 
+            href="https://whatsapp.com/channel/0029VayBRLf4dTnBtUMEHv0z" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1 bg-green-500 text-black font-bold rounded hover:bg-green-400 transition-all shadow-[0_0_10px_rgba(34,197,94,0.3)] group"
+          >
+            JOIN AI <Zap className="w-3 h-3 group-hover:scale-110 transition-transform" />
+          </a>
           <div className="flex items-center gap-2 px-2 py-1 bg-green-900/20 border border-green-500/30 rounded">
             <span>CAM: {isCameraOn ? 'ACTIVE' : 'OFFLINE'}</span>
             <div className={`w-2 h-2 rounded-full ${isCameraOn ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
@@ -68,6 +77,7 @@ const App: React.FC = () => {
       {/* Main Canvas Area */}
       <main className="flex-grow relative z-10">
         <AsciiCanvas 
+          ref={canvasRef}
           options={options} 
           onCapture={handleCapture} 
           isCameraOn={isCameraOn}
@@ -78,7 +88,11 @@ const App: React.FC = () => {
       </main>
 
       {/* Controls */}
-      <ControlPanel options={options} setOptions={setOptions} />
+      <ControlPanel 
+        options={options} 
+        setOptions={setOptions} 
+        onAnalyze={() => canvasRef.current?.triggerCapture()}
+      />
 
       {/* Loading/Analysis Modal */}
       {isModalOpen && (

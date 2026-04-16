@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useImperativeHandle, forwardRef } from 'react';
 import { AsciiOptions } from '../types';
 import { getAsciiChar } from '../utils/asciiConverter';
 import { playStartupSound, playScanSound, startAmbientHum, stopAmbientHum, playButtonSound } from '../utils/soundEffects';
@@ -13,14 +13,18 @@ interface AsciiCanvasProps {
   onImageUpload: (imageData: string | null) => void;
 }
 
-export const AsciiCanvas: React.FC<AsciiCanvasProps> = ({ 
+export interface AsciiCanvasHandle {
+  triggerCapture: () => void;
+}
+
+export const AsciiCanvas = forwardRef<AsciiCanvasHandle, AsciiCanvasProps>(({ 
   options, 
   onCapture, 
   isCameraOn, 
   onCameraToggle, 
   uploadedImage, 
   onImageUpload 
-}) => {
+}, ref) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const hiddenCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -29,6 +33,10 @@ export const AsciiCanvas: React.FC<AsciiCanvasProps> = ({
   const prevFrameRef = useRef<Float32Array | null>(null);
   const animationRef = useRef<number>();
   const [error, setError] = useState<string | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    triggerCapture: () => handleCaptureClick()
+  }));
 
   useEffect(() => {
     let stream: MediaStream | null = null;
@@ -43,11 +51,13 @@ export const AsciiCanvas: React.FC<AsciiCanvasProps> = ({
       }
 
       try {
+        // Boost camera quality: Requesting HD resolution
         stream = await navigator.mediaDevices.getUserMedia({ 
           video: { 
-            width: { ideal: 640 }, 
-            height: { ideal: 480 }, 
-            facingMode: 'user' 
+            width: { ideal: 1280 }, 
+            height: { ideal: 720 }, 
+            facingMode: 'user',
+            frameRate: { ideal: 30 }
           } 
         });
         
@@ -173,11 +183,12 @@ export const AsciiCanvas: React.FC<AsciiCanvasProps> = ({
       }
 
       const prev = prevFrameRef.current;
-      const inertia = uploadedImage ? 0 : 0.75; // No smoothing for static images
+      const inertia = uploadedImage ? 0 : 0.65; // Slightly reduced inertia for more responsiveness
 
       for (let i = 0; i < pixelCount; i++) {
         const target = data[i];
         const current = prev[i];
+        // Sharper transition
         const newValue = current + (target - current) * (1 - inertia);
         prev[i] = newValue;
         data[i] = newValue;
@@ -185,7 +196,9 @@ export const AsciiCanvas: React.FC<AsciiCanvasProps> = ({
 
       ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.font = `${options.fontSize}px 'JetBrains Mono', monospace`;
+      
+      // Sharpen text rendering
+      ctx.font = `bold ${options.fontSize}px 'JetBrains Mono', monospace`;
       ctx.textBaseline = 'top';
       ctx.textAlign = 'left';
 
@@ -357,58 +370,67 @@ export const AsciiCanvas: React.FC<AsciiCanvasProps> = ({
         />
         
         {/* Floating Controls Container */}
-        <div className="absolute bottom-32 left-1/2 transform -translate-x-1/2 flex items-center gap-4 md:gap-8 z-40 bg-black/20 p-4 rounded-full backdrop-blur-sm border border-white/5">
+        <div className="absolute bottom-32 left-1/2 transform -translate-x-1/2 flex items-center gap-2 md:gap-5 z-40 bg-black/40 p-4 rounded-3xl backdrop-blur-md border border-green-500/20 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
             {/* Camera Toggle */}
-            <button 
-                onClick={handleCameraToggleClick}
-                className={`p-4 rounded-full border transition-all active:scale-95 group relative ${
-                  isCameraOn 
-                    ? 'bg-green-500/20 border-green-500/50 text-green-400 hover:bg-green-500/30' 
-                    : 'bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20'
-                }`}
-                title={isCameraOn ? "Disable Camera" : "Enable Camera"}
-            >
-                {isCameraOn ? <Video className="w-6 h-6" /> : <VideoOff className="w-6 h-6" />}
-            </button>
+            <div className="flex flex-col items-center gap-1">
+                <button 
+                    onClick={handleCameraToggleClick}
+                    className={`p-4 rounded-full border transition-all active:scale-95 group relative ${
+                      isCameraOn 
+                        ? 'bg-green-500/20 border-green-500/50 text-green-400 hover:bg-green-500/30' 
+                        : 'bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20'
+                    }`}
+                >
+                    {isCameraOn ? <Video className="w-6 h-6" /> : <VideoOff className="w-6 h-6" />}
+                </button>
+                <span className="text-[8px] text-white/40 font-mono uppercase">Camera</span>
+            </div>
 
             {/* Upload/Clear Toggle */}
-            {uploadedImage ? (
-              <button 
-                onClick={clearImage}
-                className="bg-red-500/20 border border-red-500/50 p-4 rounded-full text-red-400 hover:bg-red-500/30 transition-all active:scale-95"
-                title="Clear Upload"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            ) : (
-              <button 
-                onClick={handleUploadClick}
-                className="bg-blue-500/20 border border-blue-500/50 p-4 rounded-full text-blue-400 hover:bg-blue-500/30 transition-all active:scale-95"
-                title="Upload Image"
-              >
-                <Upload className="w-6 h-6" />
-              </button>
-            )}
+            <div className="flex flex-col items-center gap-1">
+                {uploadedImage ? (
+                  <button 
+                    onClick={clearImage}
+                    className="bg-red-500/20 border border-red-500/50 p-4 rounded-full text-red-400 hover:bg-red-500/30 transition-all active:scale-95"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                ) : (
+                  <button 
+                    onClick={handleUploadClick}
+                    className="bg-blue-500/20 border border-blue-500/50 p-4 rounded-full text-blue-400 hover:bg-blue-500/30 transition-all active:scale-95"
+                  >
+                    <Upload className="w-6 h-6" />
+                  </button>
+                )}
+                <span className="text-[8px] text-white/40 font-mono uppercase">{uploadedImage ? 'Clear' : 'Upload'}</span>
+            </div>
 
             {/* Scan & Analyze Button (Primary) */}
-            <button 
-                onClick={handleCaptureClick}
-                className="bg-green-500/20 hover:bg-green-500/40 text-green-400 border border-green-500/50 p-6 rounded-full backdrop-blur-md transition-all active:scale-95 group relative hover:shadow-[0_0_25px_rgba(0,255,0,0.5)]"
-                title="Scan & Analyze"
-            >
-                <div className="absolute inset-0 rounded-full border border-green-500 opacity-50 animate-ping"></div>
-                <ScanEye className="w-8 h-8" />
-            </button>
+            <div className="flex flex-col items-center gap-2 px-2">
+                <button 
+                    onClick={handleCaptureClick}
+                    className="bg-green-500/20 hover:bg-green-500/40 text-green-400 border border-green-500/50 p-6 rounded-full backdrop-blur-md transition-all active:scale-95 group relative hover:shadow-[0_0_25px_rgba(0,255,0,0.5)]"
+                >
+                    <div className="absolute inset-0 rounded-full border border-green-500 opacity-50 animate-ping"></div>
+                    <ScanEye className="w-8 h-8" />
+                </button>
+                <span className="text-[10px] text-green-500 font-bold tracking-tighter uppercase whitespace-nowrap bg-black/60 px-2 py-0.5 rounded border border-green-500/20">
+                    Neural Scan
+                </span>
+            </div>
 
             {/* Screenshot Button */}
-            <button 
-                onClick={handleScreenshotClick}
-                className="bg-black/60 hover:bg-green-900/80 text-green-400 border border-green-500/50 p-4 rounded-full backdrop-blur-md transition-all active:scale-95 hover:scale-105 hover:shadow-[0_0_15px_rgba(0,255,0,0.3)]"
-                title="Save Snapshot"
-            >
-                <Camera className="w-6 h-6" />
-            </button>
+            <div className="flex flex-col items-center gap-1">
+                <button 
+                    onClick={handleScreenshotClick}
+                    className="bg-black/60 hover:bg-green-900/80 text-green-400 border border-green-500/50 p-4 rounded-full backdrop-blur-md transition-all active:scale-95 hover:scale-105"
+                >
+                    <Camera className="w-6 h-6" />
+                </button>
+                <span className="text-[8px] text-white/40 font-mono uppercase">Save</span>
+            </div>
         </div>
     </div>
   );
-};
+});

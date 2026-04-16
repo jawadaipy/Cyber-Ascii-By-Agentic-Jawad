@@ -44,20 +44,42 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({ isOpen, onClose, i
             <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[linear-gradient(rgba(0,255,0,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,0,0.2)_1px,transparent_1px)] bg-[size:20px_20px]"></div>
 
             {isLoading ? (
-                <div className="flex-grow flex flex-col items-center justify-center space-y-6">
-                    <div className="relative">
-                        <Loader2 className="w-16 h-16 text-green-500 animate-[spin_3s_linear_infinite]" />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <Activity className="w-6 h-6 text-green-400 animate-pulse" />
-                        </div>
+                <div className="flex-grow flex flex-col items-center justify-center relative overflow-hidden">
+                    {/* Matrix Digital Rain Animation */}
+                    <div className="absolute inset-0 z-0 opacity-40 pointer-events-none overflow-hidden select-none flex justify-around">
+                        {Array.from({ length: 15 }).map((_, i) => (
+                            <div 
+                                key={i} 
+                                className="matrix-column text-[8px] sm:text-[10px] whitespace-nowrap"
+                                style={{
+                                    animationDuration: `${Math.random() * 3 + 2}s`,
+                                    animationDelay: `${Math.random() * 2}s`
+                                }}
+                            >
+                                {Array.from({ length: 30 }).map((_, j) => (
+                                    <div key={j} className="my-1">
+                                        {String.fromCharCode(0x30A0 + Math.random() * 96)}
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
                     </div>
-                    <div className="space-y-4 text-center">
-                        <div className="text-lg font-bold tracking-widest animate-pulse text-green-300">PROCESSING VISUAL STREAM...</div>
-                        <div className="text-[10px] text-green-700/80 font-mono text-left inline-block border-l border-green-900 pl-3">
-                            SYNC_STATUS: ESTABLISHED <br/>
-                            NEURAL_LINK: OPTIMIZING <br/>
-                            DEEP_SCAN: IN PROGRESS [54%] <br/>
-                            AI_CORE: ACTIVE
+
+                    <div className="relative z-10 flex flex-col items-center space-y-6 bg-black/40 backdrop-blur-sm p-4 border border-green-500/20 rounded-lg">
+                        <div className="relative">
+                            <Loader2 className="w-16 h-16 text-green-500 animate-[spin_3s_linear_infinite]" />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <Activity className="w-6 h-6 text-green-400 animate-pulse" />
+                            </div>
+                        </div>
+                        <div className="space-y-4 text-center">
+                            <div className="text-lg font-bold tracking-widest animate-pulse text-green-300">DECODING DIGITAL SIGNATURE...</div>
+                            <div className="text-[10px] text-green-700/80 font-mono text-left inline-block border-l border-green-900 pl-3">
+                                ENCRYPTION: BYPASSING <br/>
+                                NEURAL_CORE: OVERCLOCKING <br/>
+                                MATRIX_STATUS: SYNCING... <br/>
+                                READY_FOR_EXTRACT: 72%
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -163,6 +185,15 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({ isOpen, onClose, i
             0% { top: 0; }
             50% { top: 100%; }
             100% { top: 0; }
+        }
+        @keyframes matrix-fall {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        .matrix-column {
+            display: flex;
+            flex-direction: column;
+            animation: matrix-fall linear infinite;
         }
       `}</style>
     </div>

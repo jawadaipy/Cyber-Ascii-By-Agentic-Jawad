@@ -1,14 +1,15 @@
 import React from 'react';
 import { AsciiOptions, DENSITY_MAPS } from '../types';
-import { Sliders, Monitor, Type, Palette } from 'lucide-react';
+import { Sliders, Monitor, Type, Palette, ScanEye } from 'lucide-react';
 import { playButtonSound } from '../utils/soundEffects';
 
 interface ControlPanelProps {
   options: AsciiOptions;
   setOptions: React.Dispatch<React.SetStateAction<AsciiOptions>>;
+  onAnalyze?: () => void;
 }
 
-export const ControlPanel: React.FC<ControlPanelProps> = ({ options, setOptions }) => {
+export const ControlPanel: React.FC<ControlPanelProps> = ({ options, setOptions, onAnalyze }) => {
   const handleChange = (key: keyof AsciiOptions, value: any) => {
     setOptions(prev => ({ ...prev, [key]: value }));
   };
@@ -22,6 +23,17 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ options, setOptions 
     <div className="absolute bottom-0 w-full bg-black/80 border-t border-green-900/50 backdrop-blur-sm p-4 z-30 transition-all duration-300">
       <div className="max-w-6xl mx-auto flex flex-wrap gap-6 justify-center items-center text-green-500 text-xs font-mono">
         
+        {/* Analyze Button Redundancy */}
+        {onAnalyze && (
+          <button 
+            onClick={() => { playButtonSound(); onAnalyze(); }}
+            className="flex items-center gap-2 px-4 py-2 bg-green-900/40 border border-green-500/50 text-green-400 font-bold rounded-sm hover:bg-green-500 hover:text-black transition-all group"
+          >
+            <ScanEye className="w-4 h-4 group-hover:scale-110 transition-transform" />
+            ANALYZE NOW
+          </button>
+        )}
+
         {/* Font Size */}
         <div className="flex flex-col gap-1 w-32">
           <div className="flex items-center gap-2 mb-1">
