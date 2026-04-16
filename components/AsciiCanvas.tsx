@@ -51,13 +51,12 @@ export const AsciiCanvas = forwardRef<AsciiCanvasHandle, AsciiCanvasProps>(({
       }
 
       try {
-        // Ultimate camera quality: Requesting Full HD if available
+        // Ultimate camera quality: High resolution request, relaxed for mobile
         stream = await navigator.mediaDevices.getUserMedia({ 
           video: { 
-            width: { ideal: 1920 }, 
-            height: { ideal: 1080 }, 
-            facingMode: 'user',
-            frameRate: { ideal: 30 }
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            facingMode: 'user'
           } 
         });
         
@@ -132,7 +131,7 @@ export const AsciiCanvas = forwardRef<AsciiCanvasHandle, AsciiCanvasProps>(({
       }
 
       // Check if source is ready
-      if (source instanceof HTMLVideoElement && source.readyState < 2) {
+      if (source instanceof HTMLVideoElement && (source.readyState < 2 || source.videoWidth === 0)) {
         animationRef.current = requestAnimationFrame(renderLoop);
         return;
       }
@@ -166,12 +165,32 @@ export const AsciiCanvas = forwardRef<AsciiCanvasHandle, AsciiCanvasProps>(({
         prevFrameRef.current = null;
       }
 
+      // Calculate object-fit: cover mapping
+      const sourceAspect = source instanceof HTMLVideoElement ? source.videoWidth / source.videoHeight : source.naturalWidth / source.naturalHeight;
+      const canvasAspect = cols / rows;
+
+      let drawWidth = cols;
+      let drawHeight = rows;
+      let offsetX = 0;
+      let offsetY = 0;
+
+      if (sourceAspect > canvasAspect) {
+        // Source is wider than canvas
+        drawWidth = rows * sourceAspect;
+        offsetX = -(drawWidth - cols) / 2;
+      } else {
+        // Source is taller than canvas
+        drawHeight = cols / sourceAspect;
+        offsetY = -(drawHeight - rows) / 2;
+      }
+
       hiddenCtx.save();
       if (!uploadedImage) {
+        // We need to mirror the video, but keep the offset correct
         hiddenCtx.translate(cols, 0);
         hiddenCtx.scale(-1, 1);
       }
-      hiddenCtx.drawImage(source, 0, 0, cols, rows);
+      hiddenCtx.drawImage(source, offsetX, offsetY, drawWidth, drawHeight);
       hiddenCtx.restore();
       
       const frameData = hiddenCtx.getImageData(0, 0, cols, rows);
