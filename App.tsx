@@ -7,15 +7,21 @@ import { analyzeImage } from './services/geminiService';
 import { Camera, Terminal, Zap, ScanEye } from 'lucide-react';
 import { playAnalysisStartSound, playAnalysisCompleteSound } from './utils/soundEffects';
 
+const DEFAULT_OPTIONS: AsciiOptions = {
+  fontSize: 12,
+  brightness: 1.0,
+  contrast: 1.0,
+  colorMode: 'matrix',
+  density: 'complex',
+  resolution: 0.2,
+};
+
 const App: React.FC = () => {
-  const [options, setOptions] = useState<AsciiOptions>({
-    fontSize: 12,
-    brightness: 1.0,
-    contrast: 1.0,
-    colorMode: 'matrix',
-    density: 'complex',
-    resolution: 0.2, // Factor of window size
-  });
+  const [options, setOptions] = useState<AsciiOptions>(DEFAULT_OPTIONS);
+
+  const handleReset = useCallback(() => {
+    setOptions(DEFAULT_OPTIONS);
+  }, []);
 
   const canvasRef = useRef<AsciiCanvasHandle>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -92,6 +98,7 @@ const App: React.FC = () => {
         options={options} 
         setOptions={setOptions} 
         onAnalyze={() => canvasRef.current?.triggerCapture()}
+        onReset={handleReset}
       />
 
       {/* Loading/Analysis Modal */}
